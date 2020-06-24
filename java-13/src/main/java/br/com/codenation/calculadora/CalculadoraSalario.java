@@ -4,26 +4,27 @@ package br.com.codenation.calculadora;
 public class CalculadoraSalario {
 
 	public long calcularSalarioLiquido(double salarioBase) {
-		//Use o Math.round apenas no final do método para arredondar o valor final.
-		//Documentação do método: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#round-double-
-		if(salarioBase==0 || salarioBase<=0){
-			return 0;
-		}
-
-		double teste = calcularInss(salarioBase);
+		
 		if(salarioBase<=1039){
 			return 0;
 		}
-		if(salarioBase-teste<=3000){
-			return Math.round(salarioBase-teste);
+
+		return calcularIRRF(salarioBase);
+
+	}
+
+	public long calcularIRRF(double salarioBase){
+		double salarioBaseMenosINSS = calcularInss(salarioBase);
+		
+		if(salarioBase-salarioBaseMenosINSS<=3000){
+			return Math.round(salarioBase-salarioBaseMenosINSS);
 		}
-		else if((salarioBase-teste)>3000 && (salarioBase-teste)<=6000 ){
+		else if((salarioBase-salarioBaseMenosINSS)<=6000 ){
 			
-			return  Math.round(salarioBase-((salarioBase-teste)*0.075)-teste);
+			return  Math.round(salarioBase-((salarioBase-salarioBaseMenosINSS)*0.075)-salarioBaseMenosINSS);
 		}
 
-	return  Math.round(salarioBase-((salarioBase-teste)*0.15)-teste);
-
+		return  Math.round(salarioBase-((salarioBase-salarioBaseMenosINSS)*0.15)-salarioBaseMenosINSS);
 	}
 	
 	
@@ -37,8 +38,8 @@ public class CalculadoraSalario {
 			
 			return  Math.round(salarioBase*0.09);
 		}
-		return  Math.round(salarioBase*0.11);
-}
+		return  salarioBase*0.11;
+	}
 }
 /*Dúvidas ou Problemas?
 Manda e-mail para o meajuda@codenation.dev que iremos te ajudar! 
