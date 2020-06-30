@@ -1,6 +1,5 @@
 package com.challenge.desafio;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import com.challenge.annotation.Somar;
@@ -14,21 +13,15 @@ public class CalculadorDeClasses implements Calculavel {
     BigDecimal sum = BigDecimal.ZERO;
     for (Field field : classe.getClass().getDeclaredFields()) {
       if (isBigDecimal(field)) {
-        for(Annotation annotation:field.getAnnotations())
-        {
-          
-          if(isSumAnnotation(annotation)){
-            try {
-              field.setAccessible(true);
-              sum = sum.add((BigDecimal) field.get(classe));
-              break;
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
+        if (isSumAnnotation(field)) {
+          field.setAccessible(true);
+          try {
+            sum = sum.add((BigDecimal) field.get(classe));
+          } catch (IllegalArgumentException | IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
           }
         }
-        
       }else{
         return new BigDecimal(0);
       }
@@ -40,17 +33,13 @@ public class CalculadorDeClasses implements Calculavel {
     BigDecimal sub = new BigDecimal(0);
     for (Field field : classe.getClass().getDeclaredFields()) {
       if (isBigDecimal(field)) {
-        for(Annotation annotation:field.getAnnotations())
-        {
-          if(isSubAnnotation(annotation)){
-            try {
-              field.setAccessible(true);
-              sub = sub.add((BigDecimal) field.get(classe));
-              break;
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
+        if (isSubAnnotation(field)) {
+          field.setAccessible(true);
+          try {
+            sub = sub.add((BigDecimal) field.get(classe));
+          } catch (IllegalArgumentException | IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
           }
         }
       }else{
@@ -70,15 +59,14 @@ public class CalculadorDeClasses implements Calculavel {
   }
 
   public Boolean isBigDecimal(Field field){
-    return field.getType().getTypeName().equals("java.math.BigDecimal");
+    return field.getType().isAssignableFrom(BigDecimal.class);
   }
 
-  public Boolean isSumAnnotation (Annotation annotation){
-    
-    return annotation instanceof Somar;
+  public Boolean isSumAnnotation (Field field){
+    return field.isAnnotationPresent(Somar.class);
   }
 
-  public Boolean isSubAnnotation (Annotation annotation){
-    return annotation instanceof Subtrair;
+  public Boolean isSubAnnotation (Field field){
+    return field.isAnnotationPresent(Subtrair.class);
   }
 }

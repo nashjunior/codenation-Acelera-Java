@@ -7,5 +7,5 @@
 > Task :testClasses
 > Task :test
 
-BUILD SUCCESSFUL in 13s
+BUILD SUCCESSFUL in 11s
 4 actionable tasks: 4 executed
