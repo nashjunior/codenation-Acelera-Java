@@ -1,6 +1,5 @@
 package br.com.codenation.service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,14 +29,9 @@ public class OrderServiceImpl implements OrderService {
 	 */
 	@Override
 	public Set<Product> findProductsById(List<Long> ids) {
-		Set<Product> setProducts = new HashSet<>();
-		for (Long id : ids) {
-			Optional<Product> product = productRepository.findById(id);
-			if (product.isPresent()) {
-				setProducts.add(product.get());
-			}
-		}
-		return setProducts;
+
+		return ids.stream().map(id -> productRepository.findById(id)).filter(Optional::isPresent).map(Optional::get)
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -45,11 +39,7 @@ public class OrderServiceImpl implements OrderService {
 	 */
 	@Override
 	public Double calculateMultipleOrders(List<List<OrderItem>> orders) {
-		Double valorTotal = 0.0;
-		for (List<OrderItem> order : orders) {
-			valorTotal += valorTotal(order);
-		}
-		return valorTotal;
+		return orders.stream().map(order -> valorTotal(order)).reduce(0.0, Double::sum);
 	}
 
 	/**
@@ -57,21 +47,18 @@ public class OrderServiceImpl implements OrderService {
 	 */
 	@Override
 	public Map<Boolean, List<Product>> groupProductsBySale(List<Long> productIds) {
-		return null;
+		return findProductsById(productIds).stream().collect(Collectors.groupingBy(Product::getIsSale));
 	}
 
 	private Double valorTotal(List<OrderItem> items) {
-		Double valorTotal = 0.0;
-		return items.stream().map(item -> productRepository.findById(item.getProductId())).collect(Collectors.toList())
-				.stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()).stream()
-				.map(product -> product.getValue()).reduce(0.0, Double::sum);
-		/*
-		 * productRepository.findAll().stream() .filter(produto ->
-		 * items.contains(produto)). Optional<Product> p =
-		 * productRepository.findById(item.getProductId()); if (p.isPresent()) { if
-		 * (p.get().getIsSale()) { valorTotal += (Double) p.get().getValue() * 0.8; }
-		 * else { valorTotal += (Double) p.get().getValue(); } }
-		 */
+		return items.stream().map(item ->  {
+			Optional <Product> product = productRepository.findById(item.getProductId());
+			if(product.isPresent()){
+				return product.get().getIsSale()==true? product.get().getValue() * item.getQuantity() * 0.8
+				:product.get().getValue() * item.getQuantity();
+			}
+			return 0.0;
+		}).reduce(0.0, Double::sum);
 	}
 
 }
